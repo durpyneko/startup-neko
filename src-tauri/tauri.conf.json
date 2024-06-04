@@ -1,0 +1,54 @@
+{
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devPath": "http://localhost:1420",
+    "distDir": "../dist",
+    "withGlobalTauri": true
+  },
+  "package": {
+    "productName": "startup-neko",
+    "version": "0.0.1"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false,
+        "open": true
+      }
+    },
+    "windows": [
+      {
+        "width": 400,
+        "height": 400,
+        "center": true,
+        "label": "main",
+        "resizable": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "decorations": false,
+        "title": "startup-neko"
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "dev.durpy.startup-neko",
+      "shortDescription": "startup-neko",
+      "copyright": "durpyneko",
+      "longDescription": "Startup program to welcome you at login!",
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "resources": ["assets/audio/okaeri.mp3", "assets/images/catto.png"]
+    }
+  }
+}

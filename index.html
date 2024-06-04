@@ -8,13 +8,39 @@
     <!-- <script type="module" src="/src/main.ts" defer></script> -->
   </head>
 
-  <body style="background: transparent; margin: none; padding: none">
-    <img
-      id="catto-image"
-      style="max-width: 98%; -webkit-user-drag: none; overflow: hidden"
-      alt="catto"
-      src="src/assets/images/catto.png"
-    />
-    <!-- <div id="text"></div> -->
+  <body
+    style="
+      background: transparent;
+      margin: none;
+      padding: none;
+      overflow: hidden;
+    "
+  >
+    <div id="image-parent"></div>
+    <script>
+      fetch("http://localhost:8000/image")
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          const imageUrl = URL.createObjectURL(blob);
+          const image = document.createElement("img");
+          const image_child = document
+            .getElementById("image-parent")
+            .appendChild(image);
+          // image_child.id = "catto-image";
+          image_child.style.maxWidth = "100%";
+          image_child.src = imageUrl;
+        })
+        .catch((error) => {
+          console.error(
+            "There has been a problem with your fetch operation:",
+            error
+          );
+        });
+    </script>
   </body>
 </html>

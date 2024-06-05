@@ -2,45 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- <link rel="stylesheet" href="/src/styles.css" /> -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>startup-neko</title>
-    <!-- <script type="module" src="/src/main.ts" defer></script> -->
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/main.ts" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
-
-  <body
-    style="
-      background: transparent;
-      margin: none;
-      padding: none;
-      overflow: hidden;
-    "
-  >
+  <body>
+    <!-- * dev testing -->
+    <!-- <div id="temp-txt" style="color: aqua"></div> -->
     <div id="image-parent"></div>
-    <script>
-      fetch("http://localhost:8000/image")
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.blob();
-        })
-        .then((blob) => {
-          const imageUrl = URL.createObjectURL(blob);
-          const image = document.createElement("img");
-          const image_child = document
-            .getElementById("image-parent")
-            .appendChild(image);
-          // image_child.id = "catto-image";
-          image_child.style.maxWidth = "100%";
-          image_child.src = imageUrl;
-        })
-        .catch((error) => {
-          console.error(
-            "There has been a problem with your fetch operation:",
-            error
-          );
-        });
-    </script>
   </body>
 </html>

@@ -7,13 +7,14 @@ extern crate rocket;
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::fs::NamedFile;
 use rocket::http::Header;
+use rocket::Request;
 use rocket::Response;
-use rocket::{Request, Rocket};
 use rodio::{Decoder, Source};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use tauri::Manager;
 
+// waiting for Tauri v2 release
 #[get("/image")]
 async fn image() -> Option<NamedFile> {
     NamedFile::open(Path::new("assets/images/catto.png"))
@@ -21,7 +22,7 @@ async fn image() -> Option<NamedFile> {
         .ok()
 }
 
-// probably not a great idea
+// uhhh
 struct CORS;
 
 #[rocket::async_trait]
@@ -46,23 +47,24 @@ impl Fairing for CORS {
     }
 }
 
-fn play(window: Arc<Mutex<tauri::Window>>) {
+#[tauri::command]
+fn frontend_ready(app_state: tauri::State<'_, AppState>) {
     // TODO: Read filepath/filename from config (settings)
-    if let Err(e) = play_audio("assets/audio/okaeri.mp3", window) {
-        println!("Error: {}", e);
-    }
+    let window = app_state.window.clone();
+    std::thread::spawn(move || {
+        if let Err(e) = play_audio("assets/audio/okaeri.mp3", window) {
+            println!("Error: {}", e);
+        }
+    });
 }
 
 fn play_audio(
     file_path: &str,
     window: Arc<Mutex<tauri::Window>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // dev is lazy so prob a TODO here
-    // wait for the DOM to load via seconds
-    // instead of telling tauri from the frontend
-    // that it has been loaded
-    // lmao, suck my dick uwu
-    std::thread::sleep(std::time::Duration::from_secs(1));
+    // Wait 200ms for nicer audio transition after frontend
+    // has loaded
+    std::thread::sleep(std::time::Duration::from_millis(200));
 
     // Create an output stream
     let (_stream, stream_handle) = rodio::OutputStream::try_default()?;
@@ -103,7 +105,8 @@ async fn main() {
     tauri::Builder::default()
         .setup(|app| {
             tauri::async_runtime::spawn(async move {
-                let _rocket = rocket::build() // .configure(rocket::Config::figment().merge(("port", 133769)))
+                let _rocket = rocket::build()
+                    .configure(rocket::Config::figment().merge(("port", 4309)))
                     .attach(CORS)
                     .mount("/", routes![image])
                     .launch()
@@ -118,16 +121,11 @@ async fn main() {
                 window: Arc::new(Mutex::new(window)),
             };
 
-            {
-                let app_state = app_state.clone();
-                std::thread::spawn(move || {
-                    play(app_state.window);
-                });
-            }
+            app.manage(app_state);
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![])
+        .invoke_handler(tauri::generate_handler![frontend_ready])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

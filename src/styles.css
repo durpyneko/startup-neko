@@ -1,1 +1,6 @@
-
+body {
+  background: transparent;
+  margin: none;
+  padding: none;
+  overflow: hidden;
+}

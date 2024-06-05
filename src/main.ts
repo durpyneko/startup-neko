@@ -1,42 +1,28 @@
 import { invoke } from "@tauri-apps/api/tauri";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Generate image on startup to avoid blank image icon
-  // ! will need to think of a better way for this lmao
-  fetch("http://127.0.0.1:4309/image")
+  // Fetch image bytes from the backend
+  invoke<Uint8Array>("get_image")
     .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.blob();
-    })
-    .then((blob) => {
+      // Create a Blob from the byte array
+      const blob = new Blob([new Uint8Array(response)], { type: "image/png" });
       const imageUrl = URL.createObjectURL(blob);
-      const image = document.createElement("img");
-      // @ts-ignore
-      const image_child = document
-        .getElementById("image-parent")
-        .appendChild(image);
-      image_child.style.maxWidth = "100%";
-      image_child.src = imageUrl;
 
-      // Wait for image to fully load
-      image_child.addEventListener("load", () => {
-        // Tell the backend the DOM fully loaded
-        if (typeof window !== "undefined") {
-          // * dev testing
-          /* const tempTxtElement = document.getElementById("temp-txt");
-      if (tempTxtElement) {
-        tempTxtElement.innerText = "Loaded!";
-      } */
+      const image = document.createElement("img");
+      const imageParent = document.getElementById("image-parent");
+
+      if (imageParent) {
+        const imageChild = imageParent.appendChild(image);
+        imageChild.style.maxWidth = "100%";
+        imageChild.src = imageUrl;
+
+        // Notify backend that frontend is ready
+        imageChild.addEventListener("load", () => {
           invoke("frontend_ready");
-        }
-      });
+        });
+      }
     })
     .catch((error) => {
-      console.error(
-        "There has been a problem with your fetch operation:",
-        error
-      );
+      console.error("Error fetching image:", error);
     });
 });
